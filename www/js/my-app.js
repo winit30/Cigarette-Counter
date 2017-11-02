@@ -21,6 +21,7 @@ var mySwiper = myApp.swiper('.swiper-container', {
 
 
 if(window.localStorage.getItem('cigName') && window.localStorage.getItem('cigPrice')) {
+		myApp.showPreloader();
  	  $$('.appInstalled').remove();
 		mainView.router.load({pageName: 'index'});
 		$$('.main-page').show();
@@ -78,9 +79,6 @@ function onBackKeyDown() {
 	$$(".back").click();
 }
 
-
-
-
 jQuery(document).ready(function($){
 	var liPos = 0;
 	var liWidth = $('.swiper li').width();
@@ -119,12 +117,15 @@ jQuery(document).ready(function($){
 						$('.swiper li').eq(savedCig).addClass('active');
 						liPos = savedCig;
 						ulPos = ulPosInit;
+						myApp.hidePreloader();
+						clearInterval(interval);
 					}
 					a++;
 					if(a ==10){
+						myApp.hidePreloader();
 						clearInterval(interval);
 					}
-			},100);
+			},200);
 
 	$('.undo-btn').on('click', function(){
 		var savedCig = window.localStorage.getItem('gino');
