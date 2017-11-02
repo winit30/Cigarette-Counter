@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<!--
+   Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
+
+   Licensed to the Apache Software Foundation (ASF) under one
+   or more contributor license agreements.  See the NOTICE file
+   distributed with this work for additional information
+   regarding copyright ownership.  The ASF licenses this file
+   to you under the Apache License, Version 2.0 (the
+   "License"); you may not use this file except in compliance
+   with the License.  You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing,
+   software distributed under the License is distributed on an
+   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+   specific language governing permissions and limitations
+   under the License.
+   -->
+<html ng-app="myApp">
+   <head>
+      <meta charset="utf-8" />
+      <meta name="format-detection" content="telephone=no" />
+      <meta name="msapplication-tap-highlight" content="no" />
+      <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+      <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+      <!--<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+      <meta http-equiv="Content-Security-Policy" content=" style-src 'self' 'unsafe-inline';  script-src 'self' 'unsafe-inline' 'unsafe-eval'; media-src *">
+      <!-- Good default declaration:
+         * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+         * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+         * Disables use of eval() and inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+             * Enable inline JS: add 'unsafe-inline' to default-src
+             * Enable eval(): add 'unsafe-eval' to default-src
+         * Create your own at http://cspisawesome.com
+         -->
+      <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+      <!-- Path to Framework7 Library CSS-->
+      <link rel="stylesheet" href="css/framework7.material.min.css">
+      <link rel="stylesheet" href="css/framework7.material.colors.min.css">
+      <!-- Path to your custom app styles-->
+      <link rel="stylesheet" href="css/my-app.css">
+      <link rel="stylesheet" type="text/css" href="css/index.css" />
+      <title>SmokeCount</title>
+   </head>
+   <body class="theme-bluegray" ng-controller="cigCtrl">
+      <div class="app">
+         <div id="deviceready" class="blink">
+            <p class="event listening"></p>
+         </div>
+      </div>
+      <div class="page-content appInstalled" ng-hide="appInstalled">
+         <!-- Slider -->
+         <div class="swiper-container">
+            <div class="swiper-wrapper">
+               <div class="swiper-slide">
+                  <span>
+                     <img src="img/slide1.png">
+                     <p class="guide-text">Fill up the details and then click on the plus button to start the count.</p>
+                  </span>
+               </div>
+               <div class="swiper-slide">
+                  <span>
+                     <img src="img/slide2.png">
+                     <p class="guide-text">Click on the "Done" button to save the count.</p>
+                  </span>
+               </div>
+               <div class="swiper-slide">
+                  <span>
+                     <img src="img/slide3.png">
+                     <p class="guide-text">Click on the "Undo" button to reverse the count if not saved.</p>
+                     <a href="#" class="button button-big button-fill show-index white-button" ng-click="doneWithGuide()">Start</a>
+                  </span>
+               </div>
+            </div>
+            <div class="swiper-pagination"></div>
+         </div>
+      </div>
+      <div class="views" id="app-view" >
+         <!-- Your main view, should have "view-main" class -->
+         <div class="view view-main">
+            <!-- Pages container, because we use fixed navbar and toolbar, it has additional appropriate classes-->
+            <div class="pages navbar-fixed toolbar-fixed">
+               <!-- Page, "data-page" contains page name -->
+               <div data-page="index" class="page main-page">
+                  <div class="panel-overlay"></div>
+                  <!-- Left Panel with Reveal effect -->
+                  <!-- Right Panel with Cover effect -->
+                  <div class="panel panel-right panel-cover">
+                     <div class="list-block">
+                        <ul class="list-block">
+                           <li>
+                              <a href="#settings" class="close-panel">
+                                 <div class="item-content">
+                                    <div class="item-inner"><i class="icon icon-settings"></i>&nbsp;&nbsp; Settings</div>
+                                 </div>
+                              </a>
+                           </li>
+                           <li>
+                              <a href="#getrecords" class="close-panel">
+                                 <div class="item-content">
+                                    <div class="item-inner"><i class="icon icon-records"></i>&nbsp;&nbsp; Smoking Records</div>
+                                 </div>
+                              </a>
+                           </li>
+                           <li>
+                              <a href="#feedback" class="close-panel">
+                                 <div class="item-content">
+                                    <div class="item-inner"><i class="icon icon-feedback"></i>&nbsp;&nbsp; Feedback</div>
+                                 </div>
+                              </a>
+                           </li>
+
+                        </ul>
+                     </div>
+                  </div>
+                  <!-- Top Navbar. In Material theme it should be inside of the page-->
+                  <div class="navbar">
+                     <div class="navbar-inner">
+                        <div class="center">SmokeCount</div>
+                        <div class="right"><a href="#" class="open-panel link icon-only"><i class="icon icon-bars"></i></a></div>
+                     </div>
+                  </div>
+                  <!-- Bottom Toolbar. In Material theme it should be inside of the page-->
+                  <div class="toolbar toolbar-bottom">
+                     <div class="toolbar-inner">
+                        <!-- Toolbar links -->
+                        <a href="#" class="link undo-btn" ng-click="undoCigCount()"><i class="icon icon-undo"></i> Reverse</a>
+                        <a href="#" class="link done-btn" ng-click="doneCigCount()"><i class="icon icon-done"></i> Done</a>
+                     </div>
+                  </div>
+                  <!-- Scrollable page content -->
+                  <div class="page-content">
+                     <!-- Link to another page -->
+                     <div class="bg-color">
+                        <div class="content-block-title title-cont">Count of the day</div>
+                        <div class="content-block">
+                           <div class="number_cont">
+                              <ul class="swiper"  >
+                                 <li ng-repeat='number in numbers'><span>{{number}}</span></li>
+                              </ul>
+                           </div>
+                           <p class="total-cig-num" id="cig-num">{{cigCount}}</p>
+                           <p class="total-cig-num cont-hidden" id="cig-num-done-hidden"></p>
+                           <a href="#" class="floating-button custom-float" ng-click="incrementCigNo()">
+                           <i class="icon icon-plus"></i>
+                           </a>
+                        </div>
+                     </div>
+                     <div class="content-block remove-padding">
+                        <div class="col-100 details-block">
+                           <div class="list-block">
+                              <ul>
+                                 <li>
+                                    <div class="item-content">
+                                       <div class="item-media"><i class="icon icon-brand"></i></div>
+                                       <div class="item-inner">
+                                          <div class="item-title">Brand</div>
+                                          <div class="item-after">{{cigname}}</div>
+                                       </div>
+                                    </div>
+                                 </li>
+                                 <li>
+                                    <div class="item-content">
+                                       <div class="item-media"><i class="icon icon-money"></i></div>
+                                       <div class="item-inner">
+                                          <div class="item-title">Money Spent</div>
+                                          <div class="item-after"><span ng-bind-html="currencies[cigCurrency]"></span>&nbsp;{{cigCount * cigprice | currency:''}}</div>
+                                       </div>
+                                    </div>
+                                 </li>
+                                 <li>
+                                    <div class="item-content">
+                                       <div class="item-media"><i class="icon icon-time"></i></div>
+                                       <div class="item-inner">
+                                          <div class="item-title">Last Smoked</div>
+                                          <div class="item-after" ng-show="timeNotAvailable">Not Available</div>
+                                          <div class="item-after" ng-hide="timeNotAvailable">at {{cigTime}}</div>
+                                       </div>
+                                    </div>
+                                 </li>
+                                 <li>
+                                    <div class="item-content">
+                                       <div class="item-media"><i class="icon icon-timer"></i></div>
+                                       <div class="item-inner">
+                                          <div class="item-title">Not Smoked</div>
+                                          <div class="item-after" ng-show="timeNotAvailable">Not Available</div>
+                                          <div class="item-after" ng-hide="timeNotAvailable">from<span ng-show="fromHrs">&nbsp;{{hrsBefore}} {{hrsBefore == 1 ? 'hr' : 'hrs'}}</span>&nbsp;{{minsBefore}} {{minsBefore == 01 || minsBefore == 00 ? 'min' : 'mins'}}</div>
+                                       </div>
+                                    </div>
+                                 </li>
+                                 <li>
+                                    <div class="item-content">
+                                       <div class="item-media"><i class="icon icon-count"></i></div>
+                                       <div class="item-inner">
+                                          <div class="item-title">Total Counts</div>
+                                          <div class="item-after">{{allData | sumFilter}} Sticks</div>
+                                       </div>
+                                    </div>
+                                 </li>
+                                 <li>
+                                    <div class="item-content">
+                                       <div class="item-media"><i class="icon icon-credit"></i></div>
+                                       <div class="item-inner">
+                                          <div class="item-title">Total Money Spent</div>
+                                          <div class="item-after"><span ng-bind-html="currencies[cigCurrency]"></span>&nbsp;{{allData | moneyFilter | currency:''}}</div>
+                                       </div>
+                                    </div>
+                                 </li>
+                              </ul>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <!-- Details page -->
+               <div class="page cached " data-page="details">
+                  <div class="navbar">
+                     <div class="navbar-inner">
+                        <div class="center">SmokeCount</div>
+                     </div>
+                  </div>
+                  <div class="page-content">
+                     <div class="list-block">
+                        <ul>
+                           <li>
+                              <div class="item-content">
+                                 <div class="item-inner">
+                                    <div class="item-title floating-label">Brand</div>
+                                    <div class="item-input item-input-field">
+                                       <input type="text" value="" name="name" placeholder="" class="" ng-model="cigname" />
+                                    </div>
+                                 </div>
+                              </div>
+                           </li>
+                           <li>
+                              <div class="item-content">
+                                 <div class="item-inner">
+                                    <div class="item-title floating-label">Price</div>
+                                    <div class="item-input item-input-field">
+                                       <input type="number" value="" name="price" placeholder="" class="" string-to-number ng-model="cigprice" />
+                                    </div>
+                                 </div>
+                              </div>
+                           </li>
+                        </ul>
+                     </div>
+                     <div class="list-block">
+                        <ul>
+                           <!-- Smart select item -->
+                           <li>
+                              <!-- Additional "smart-select" class -->
+                              <a href="#" class="item-link smart-select" data-back-on-select="true">
+                                 <!-- select -->
+                                 <select name=" Currency" ng-model="cigCurrency">
+                                    <option value="" selected>Select Currency</option>
+                                    <option value="{{key}}" ng-repeat="(key, value) in currencies">{{key}}</option>
+                                 </select>
+                                 <div class="item-content">
+                                    <div class="item-inner">
+                                       <!-- Select label -->
+                                       <div class="item-title">Currency</div>
+                                       <!-- Selected value, not required -->
+                                       <div class="item-after">Select Price</div>
+                                    </div>
+                                 </div>
+                              </a>
+                           </li>
+                           <li>
+                              <div class="item-content">
+                                 <div class="item-inner">
+                                    <p class="full-width">
+                                       <a href="#" class="button button-big button-fill show-index" ng-click="storeVal()">Start your count</a>
+                                    </p>
+                                 </div>
+                              </div>
+                           </li>
+                           <!-- Another smart selects or list view elements -->
+                        </ul>
+                     </div>
+                  </div>
+               </div>
+               <!-- Settings page -->
+               <div class="page cached" data-page="settings">
+                  <div class="navbar">
+                     <div class="navbar-inner">
+                        <div class="left"><a href="#index" class="link icon-only back"><i class="icon icon-back"></i></a></div>
+                        <div class="center">Settings</div>
+                     </div>
+                  </div>
+                  <div class="page-content settings-cont">
+                     <div class="list-block">
+                        <ul>
+                           <li>
+                              <a href="#details" class="black-color">
+                                 <div class="item-content">
+                                    <div class="item-media"><i class="icon icon-change-details"></i></div>
+                                    <div class="item-inner">
+                                       <div class="item-title">Change Smoke Details</div>
+                                    </div>
+                                 </div>
+                              </a>
+                           </li>
+                           <li>
+                              <a href="#" class="black-color confirm-ok">
+                                 <div class="item-content">
+                                    <div class="item-media"><i class="icon icon-reset"></i> </div>
+                                    <div class="item-inner">
+                                       <div class="item-title">Reset Smoking Records</div>
+                                    </div>
+                                 </div>
+                              </a>
+                           </li>
+                        </ul>
+                     </div>
+                  </div>
+               </div>
+               <!--Feedback page-->
+               <div class="page cached" data-page="feedback">
+                  <div class="navbar">
+                     <div class="navbar-inner">
+                        <div class="left"><a href="#index" class="link icon-only back"><i class="icon icon-back"></i></a></div>
+                        <div class="center">Feedback</div>
+                     </div>
+                  </div>
+                  <div class="page-content">
+                     <div class="content-block">
+                        <p class="font13">Your suggestions and ideas are important to me. I review many of the ideas people send me and use them to improve the Smokecout experience for everyone.</p>
+                        <p class="font13">If you're not looking to give feedback but you need help with a specific issue, you can even ask me questions. Make sure to put your email for helping me to give you reply...:)</p>
+                     </div>
+                     <div class="list-block">
+                        <ul>
+                           &nbsp;
+                           <li class="align-top">
+                              <div class="item-content">
+                                 <div class="item-media"><i class="icon icon-message"></i></div>
+                                 <div class="item-inner">
+                                    <div class="item-title label">Write me here...</div>
+                                    <div class="item-input">
+                                       <textarea class="resizable" ng-model="feedback"></textarea>
+                                    </div>
+                                 </div>
+                              </div>
+                           </li>
+                           <li>
+                              <div class="item-content">
+                                 <div class="item-inner">
+                                    <a href="#" class="button button-big button-fill" ng-click="sendFeedback()">Send</a>
+                                 </div>
+                              </div>
+                           </li>
+                        </ul>
+                        <div id="placeholder" style="width:300px;height:150px"></div>
+                     </div>
+                  </div>
+               </div>
+               <!--get records page -->
+               <div class="page cached" data-page="getrecords">
+                  <div class="navbar">
+                     <div class="navbar-inner">
+                        <div class="left"><a href="#index" class="link icon-only back"><i class="icon icon-back"></i></a></div>
+                        <div class="center">Records</div>
+                     </div>
+                  </div>
+                  <div class="toolbar tabbar">
+                     <div class="toolbar-inner">
+                        <a href="#tab1" class="tab-link active">Graph</a>
+                        <a href="#tab2" class="tab-link">All Records</a>
+                        <a href="#tab3" class="tab-link">Search by date</a>
+                        <span class="tab-link-highlight"></span>
+                     </div>
+                  </div>
+                  <!-- Tabs swipeable wrapper, required to switch tabs with swipes -->
+                  <div class="tabs-swipeable-wrap">
+                     <!-- Tabs, tabs wrapper -->
+                     <div class="tabs">
+                        <!-- Tab 1, active by default -->
+                        <div id="tab1" class="page-content tab active">
+                          <div class="content-block">
+                            <p>Last 7 days records</p>
+                            <canvas id="myChart" width="300" height="300"></canvas>
+                          </div>
+                        </div>
+                        <!-- Tab 2 -->
+                        <div id="tab2" class="page-content tab">
+                           <div class="list-block" ng-repeat="data in allData | reverse" >
+                              <div class="card allrecords">
+                                 <div class="card-header">{{data.date | dateFormat}}</div>
+                                 <ul>
+                                    <li>
+                                       <div class="item-inner">
+                                          <div class="item-title">Brand</div>
+                                          <div class="item-after">{{data.name}}</div>
+                                       </div>
+                                    </li>
+                                    <li>
+                                       <div class="item-inner">
+                                          <div class="item-title">Smoke counts</div>
+                                          <div class="item-after">{{data.count}}</div>
+                                       </div>
+                                    </li>
+                                    <li>
+                                       <div class="item-inner">
+                                          <div class="item-title">Money Spent</div>
+                                          <div class="item-after"><i ng-bind-html="currencies[cigCurrency]"></i>&nbsp;{{data.count * data.price | currency:''}}</div>
+                                       </div>
+                                    </li>
+                                 </ul>
+                              </div>
+                           </div>
+                        </div>
+                        <!-- Tab 3 -->
+                        <div id="tab3" class="page-content tab">
+                           <div class="content-block">
+                              <div class="row">
+                                 <div class="col-100 list-block">
+                                    <div class="item-input">
+                                       <input type="text" placeholder="Select date" readonly id="calendar-date-format" ng-model="selecteddate">
+                                    </div>
+                                 </div>
+                                 <div class="col-100"><a href="#" class="button button-big button-fill button-raised" ng-click="getRecords()">Get Records</a></div>
+                                 <div class="col-100">
+                                    <p class="list-block" ng-show="dataNotFound">No record available.</p>
+                                    <div class="list-block" ng-show="dateFound">
+                                       <ul>
+                                          <li>
+                                             <div class="item-inner">
+                                                <div class="item-title">Brand</div>
+                                                <div class="item-after">{{cigname}}</div>
+                                             </div>
+                                          </li>
+                                          <li>
+                                             <div class="item-inner">
+                                                <div class="item-title">Smoke counts</div>
+                                                <div class="item-after">{{data[0].count}}</div>
+                                             </div>
+                                          </li>
+                                          <li>
+                                             <div class="item-inner">
+                                                <div class="item-title">Money Spent</div>
+                                                <div class="item-after"><i ng-bind-html="currencies[cigCurrency]"></i>&nbsp;{{data[0].count * data[0].price | currency:''}}</div>
+                                             </div>
+                                          </li>
+                                       </ul>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+      <!-- settings Popup -->
+      <div class="popup popup-settings">
+         <div class="content-block">
+            <div class="row">
+               <div class="col-25"><a href="#index" class="close-popup setting-btn reset-cig-records" ng-click="resetCigRecords()">Yes</a></div>
+            </div>
+         </div>
+      </div>
+      <script type="text/javascript" src="cordova.js"></script>
+      <script type="text/javascript" src="js/index.js"></script>
+      <!-- Path to Framework7 Library JS-->
+      <script type="text/javascript" src="lib/framework7.min.js"></script>
+      <!-- Path to your app js-->
+      <script type="text/javascript" src="lib/jquery.min.js"></script>
+      <script type="text/javascript" src="lib/angular.min.js"></script>
+      <script type="text/javascript" src="lib/angular-route.min.js"></script>
+      <script type="text/javascript" src="lib/angular-sanitize.min.js"></script>
+      <script language="javascript" type="text/javascript" src="js/Chart.bundle.min.js"></script>
+      <script type="text/javascript" src="js/app.js"></script>
+      <script type="text/javascript" src="js/my-app.js"></script>
+
+      <script type="text/javascript">
+         app.initialize();
+         document.addEventListener("online", app.onOnline, false);
+      </script>
+   </body>
+</html>

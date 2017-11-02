@@ -1,0 +1,11 @@
+backup
+key
+node_modules
+hooks
+platforms
+plugins
+smokecount.keystore
+zipalign.exe
+info.txt
+debug.log
+npm-debug.log
