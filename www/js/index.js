@@ -63,7 +63,7 @@ var app = {
         if (cordova.platformId == 'android') {
             StatusBar.backgroundColorByHexString("#29434e");
         }
-        this.onOnline();
+        app.onOnline();
     },
     onOnline: function() {
         var networkState = navigator.connection.type;
@@ -76,14 +76,10 @@ var app = {
         var parentElement = document.getElementById(id);
         var listeningElement = parentElement.querySelector('.listening');
         //var receivedElement = parentElement.querySelector('.views');
-
-		var viewElement = document.getElementById('app-view');
-
-
-
+		    var viewElement = document.getElementById('app-view');
         //listeningElement.setAttribute('style', 'display:none;');
       //  viewElement.setAttribute('style', 'display:block;');
 
-        console.log('Received Event: ' + id);
+        //console.log('Received Event: ' + id);
     }
 };
