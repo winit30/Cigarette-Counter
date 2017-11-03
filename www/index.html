@@ -379,7 +379,11 @@
                         <!-- Tab 1, active by default -->
                         <div id="tab1" class="page-content tab active">
                           <div class="content-block">
-                            <p>Last 7 days records</p>
+                            <p class="buttons-row">
+                              <a href="#" class="button button-round" ng-click="filterRecords(7)">Last 7 days</a>
+                              <a href="#" class="button button-round" ng-click="filterRecords(30)">Last 30 days</a>
+                            </p>
+                            <p class="subHeading">Last {{lastDays}} days records</p>
                             <canvas id="myChart" width="300" height="300"></canvas>
                           </div>
                         </div>

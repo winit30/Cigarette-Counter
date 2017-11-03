@@ -306,3 +306,9 @@ background-color:#ffc107;
 .appInstalled {visibility: hidden;}
 
 .font13 {font-size: 13px;}
+
+.subHeading {
+	text-align: center;
+	font-size: 14px;
+  margin: 1.3em;
+}

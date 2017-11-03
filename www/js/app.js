@@ -30,24 +30,21 @@ var countries = {
 
 var monthArray = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+var myChart;
 //createGraph
 function createGraph(date, count){
 	var ctx = document.getElementById("myChart").getContext("2d");
-	var myChart = new Chart(ctx, {
+	myChart = new Chart(ctx, {
 							 type: 'line',
 							 data: {
-										 labels:date,
+										 labels:date.reverse(),
 									 datasets: [{
 											 label: 'No. of counts',
-											 data: count,
-											 backgroundColor: [
-													 'rgba(96,125,139, 0.2)',
-
-											 ],
-											 borderColor: [
-													 'rgba(96,125,139,1)',
-
-											 ],
+											 data: count.reverse(),
+											 backgroundColor:'rgba(96,125,139, 0.2)',
+											 pointRadius: 4,
+											 pointBackgroundColor: 'rgba(96,125,139,1)',
+											 borderColor:'rgba(96,125,139,1)',
 											 borderWidth: 1
 									 }]
 							 },
@@ -94,7 +91,7 @@ cigApp.run(function($rootScope, $timeout) {
     }
 });
 
-cigApp.service('myService', function(dateFormatFilter) {
+cigApp.service('myService', function(dateFormatFilter, $rootScope) {
 
 	this.getAllData = function(cb) {
 		var allData = [];
@@ -118,16 +115,20 @@ cigApp.service('myService', function(dateFormatFilter) {
 		return allData;
 	};
 
-	this.loadGraph = function() {
+	this.loadGraph = function(last = 7) {
+
+		if(myChart) myChart.destroy();
+
 		this.getAllData(function(res){
-			var date = res.map(function(r){
+			reverseArray = res.reverse();
+			var date = reverseArray.map(function(r){
 				return dateFormatFilter(r.date);
 			})
 
 			var count = res.map(function(r){
 				return r.count;
 			})
-			createGraph(date.slice(0,7), count.slice(0,7));
+			createGraph(date.slice(0,last), count.slice(0,last));
 		})
 	}
 });
@@ -178,7 +179,6 @@ return function(items) {
 cigApp.controller('cigCtrl', function($scope, $rootScope, $route, $window,  $interval, myService, $http) {
 
 	$scope.feedback = "";
-
 	$scope.sendFeedback = function() {
 		if($scope.feedback != "") {
 				 myApp.showIndicator();
@@ -204,6 +204,13 @@ cigApp.controller('cigCtrl', function($scope, $rootScope, $route, $window,  $int
 
 	$scope.getAllrecords = function(){
 		$scope.allData = myService.getAllData(function(res){});
+	}
+
+	$scope.lastDays = 7;
+
+	$scope.filterRecords = function(last) {
+			$scope.lastDays = last;
+			myService.loadGraph(last);
 	}
 
 	//initializing scope variables
@@ -466,6 +473,7 @@ cigApp.controller('cigCtrl', function($scope, $rootScope, $route, $window,  $int
 		myService.loadGraph();
 		$scope.getAllrecords();
 		$scope.countIncreased = false;
+		$scope.lastDays = 7;
 	}
 
 	//Delete all records including table and refresh the app.
